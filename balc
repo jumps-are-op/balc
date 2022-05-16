@@ -1,0 +1,139 @@
+#!/bin/bash
+
+# Made by jumps-are-op
+# This software is under GPLv3 and comes with ABSOLUTE NO WARRANTY
+
+main(){
+	trap 'tput cnorm;clear;exit' EXIT INT
+	tput civis
+	clear
+	key=del
+	counter=0
+	NA=' / '
+	NB=' * '
+	NC=' - '
+	ND=' 7 '
+	NE=' 8 '
+	NF=' 9 '
+	NG=' + '
+	Ng='   '
+	NH=' 4 '
+	NI=' 5 '
+	NJ=' 6 '
+	NK=' 1 '
+	NL=' 2 '
+	NM=' 3 '
+	NN=' E '
+	Nn='   '
+	NO='   0   '
+	NP=' . '
+	displayUI "" "" ""
+	while ((counter++)); true;do
+		key=$(readinput)
+		NA=' / '
+		NB=' * '
+		NC=' - '
+		ND=' 7 '
+		NE=' 8 '
+		NF=' 9 '
+		NG=' + '
+		Ng='   '
+		NH=' 4 '
+		NI=' 5 '
+		NJ=' 6 '
+		NK=' 1 '
+		NL=' 2 '
+		NM=' 3 '
+		NN=' E '
+		Nn='   '
+		NO='   0   '
+		NP=' . '
+		case "$key" in
+			'esc')exit;;
+			'/')NA='[7m / [m'
+				[ "$input" = "" ] && input=$lastInput;input+=$key;;
+			'*')NB='[7m * [m'
+				[ "$input" = "" ] && input=$lastInput;input+=$key;;
+			'-')NC='[7m - [m'
+				[ "$input" = "" ] && input=$lastInput;input+=$key;;
+			'7')ND='[7m 7 [m';input+=$key;;
+			'8')NE='[7m 8 [m';input+=$key;;
+			'9')NF='[7m 9 [m';input+=$key;;
+			'+')NG='[7m + [m';Ng='[7m   [m';
+				[ "$input" = "" ] && input=$lastInput;input+=$key;;
+			'4')NH='[7m 4 [m';input+=$key;;
+			'5')NI='[7m 5 [m';input+=$key;;
+			'6')NJ='[7m 6 [m';input+=$key;;
+			'1')NK='[7m 1 [m';input+=$key;;
+			'2')NL='[7m 2 [m';input+=$key;;
+			'3')NM='[7m 3 [m';input+=$key;;
+			'enter')
+				NN='[7m E [m'
+				Nn='[7m   [m'
+				[ "$input" = "" ] && clear && input=$lastInput &&
+					displayUI "$input" "$output" "$error" && continue
+
+				tmp=$(bc 2>/dev/null<<<"scale=5;$input")
+				if [ -n "$tmp" ];then
+					output=$tmp
+					lastInput=$input
+					input=
+				fi
+				
+				error=$(bc 2>&1 >/dev/null<<<"$input");;
+
+			'0')NO='[7m   0   [m';input+=$key;;
+			'.')NP='[7m . [m';input+=$key;;
+			'del')input=${input%?};;
+			'ctrl+del')input=;;
+			*)if [ "$counter" -lt 30 ] || [ "$counter" != 0 ];then
+				continue
+			else
+				counter=1
+			fi
+			;;
+		esac
+		clear
+		displayUI "$input" "$output" "$error"
+	done
+}
+
+displayUI(){
+	space=$(printf "%$(($(tput cols)-15))s")
+
+	echo    "$1"
+	echo    "$2"
+	echo    "${space}nLk|$NA|$NB|$NC"
+	echo    "${space}---+---+---+---"
+	echo    "${space}$ND|$NE|$NF|$NG"
+	echo    "${space}---+---+---+$Ng"
+	echo    "${space}$NH|$NI|$NJ|$Ng"
+	echo    "${space}---+---+---+---"
+	echo    "${space}$NK|$NL|$NM|$NN"
+	echo    "${space}---+---+---+$Nn"
+	echo    "${space}$NO|$NP|$Nn"
+	echo    "[8A$3"
+}
+
+readinput(){
+	local i
+	read -srn1 -t 0.05 i
+	if [ "$?" = 142 ];then
+		echo
+	elif [ "$i" = '' ];then
+		read -srn5 -t 0.05 i
+		case "$i" in
+			"")echo esc;;
+			"[3~")echo del;;
+		esac
+	else
+		case "$i" in
+			"")echo enter;;
+			'')echo del;;
+			'')echo ctrl+del;;
+			*)echo "$i";;
+		esac
+	fi
+}
+
+main "$@"
